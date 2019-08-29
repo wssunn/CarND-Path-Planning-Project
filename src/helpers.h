@@ -9,6 +9,30 @@
 using std::string;
 using std::vector;
 
+const double lane_width = 4.0;      //width of a lane
+const double safety_margin = 20.0;  //distance to keep from other cars
+const double max_speed = 49.5;      //max car speed
+
+struct Vehicle {
+  double d;
+  double vx, vy;
+  double speed;
+  double s;
+  Vehicle(nlohman::json sensor_fusion){
+    // sensor_fusion [id, x, y, vx, vy, s, d]
+    this->vx    = sensor_fusion[3];
+    this->vy    = sensor_fusion[4];
+    this->s     = sensor_fusion[5];
+    this->d     = sensor_fusion[6];
+    this->speed = sqrt(vx*vx + vy*vy);
+  }
+}
+
+//check if a vehicle is in a certain lanes, input(vehicle_d, current_lane_number)
+bool is_in_same_lane(double d, double lane_number){
+  return (d > lane_width * lane_number) && (d < lane_width * (lane_number + 1));
+}
+
 // Checks if the SocketIO event has JSON data.
 // If there is data the JSON object in string format will be returned,
 //   else the empty string "" will be returned.
@@ -39,8 +63,8 @@ double distance(double x1, double y1, double x2, double y2) {
   return sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
 }
 
-// Calculate closest waypoint to current x, y position
-int ClosestWaypoint(double x, double y, const vector<double> &maps_x, 
+// Calculate closest waypoint to current x, y position, return an index of &maps
+int ClosestWaypoint(double x, double y, const vector<double> &maps_x,
                     const vector<double> &maps_y) {
   double closestLen = 100000; //large number
   int closestWaypoint = 0;
@@ -59,7 +83,7 @@ int ClosestWaypoint(double x, double y, const vector<double> &maps_x,
 }
 
 // Returns next waypoint of the closest waypoint
-int NextWaypoint(double x, double y, double theta, const vector<double> &maps_x, 
+int NextWaypoint(double x, double y, double theta, const vector<double> &maps_x,
                  const vector<double> &maps_y) {
   int closestWaypoint = ClosestWaypoint(x,y,maps_x,maps_y);
 
@@ -82,8 +106,8 @@ int NextWaypoint(double x, double y, double theta, const vector<double> &maps_x,
 }
 
 // Transform from Cartesian x,y coordinates to Frenet s,d coordinates
-vector<double> getFrenet(double x, double y, double theta, 
-                         const vector<double> &maps_x, 
+vector<double> getFrenet(double x, double y, double theta,
+                         const vector<double> &maps_x,
                          const vector<double> &maps_y) {
   int next_wp = NextWaypoint(x,y, theta, maps_x,maps_y);
 
@@ -127,8 +151,8 @@ vector<double> getFrenet(double x, double y, double theta,
 }
 
 // Transform from Frenet s,d coordinates to Cartesian x,y
-vector<double> getXY(double s, double d, const vector<double> &maps_s, 
-                     const vector<double> &maps_x, 
+vector<double> getXY(double s, double d, const vector<double> &maps_s,
+                     const vector<double> &maps_x,
                      const vector<double> &maps_y) {
   int prev_wp = -1;
 
