@@ -339,7 +339,7 @@ int main() {
           // 0.02s for each point
           // 2.24 to convert mph into meters
           double N            = target_dist / (0.02 * ref_vel / 2.24);
-          std::cout << car_speed << endl;
+          std::cout << car_speed << std::endl;
 
           double x_point_car_coord = 0.0;
           double y_point_car_coord;
