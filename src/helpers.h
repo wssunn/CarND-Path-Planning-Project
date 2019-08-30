@@ -19,7 +19,7 @@ struct Vehicle {
   double vx, vy;
   double speed;
   double s;
-  Vehicle(nlohman::json sensor_fusion){
+  Vehicle(nlohmansn::json sensor_fusion){
     // sensor_fusion [id, x, y, vx, vy, s, d]
     this->vx    = sensor_fusion[3];
     this->vy    = sensor_fusion[4];
@@ -27,7 +27,7 @@ struct Vehicle {
     this->d     = sensor_fusion[6];
     this->speed = sqrt(vx*vx + vy*vy);
   }
-}
+};
 
 //check if a vehicle is in a certain lanes, input(vehicle_d, current_lane_number)
 bool is_in_same_lane(double d, double lane_number){
