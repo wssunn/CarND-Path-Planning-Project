@@ -322,7 +322,7 @@ int main() {
           s.set_points(pts_x, pts_y);
 
           // Define the actual (x, y) points will be used for the planner
-          vector<double> next_x_vals;
+          vector<double> next_x_vals;`
           vector<double> next_y_vals;
 
           // Start with all previous points from last time
@@ -333,7 +333,8 @@ int main() {
 
           // Calculate how to break up spline points to travel at ref velocity
           double target_x = 30.0;
-          if (car_speed < 20.0){target_x = 15.0;}
+          if (car_speed < 20.0){target_x = 10.0;}
+          else if (car_speed < 30.0){target_x = 15.0;}
           double target_y     = s(target_x);
           double target_dist  = sqrt(target_x*target_x + target_y*target_y);
           // Find number of split points to get desired speed
