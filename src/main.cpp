@@ -132,6 +132,12 @@ int main() {
             }
           }//end for iteration over all sensor Fusion
 
+          //if a car in front, slowly down without collision with front car
+          if (front_car_too_close){ref_vel -= 0.224;}
+          //if there isn't a front car and not above max speed
+          else if (ref_vel < max_speed){ref_vel += 0.224;}
+          std::cout << ref_vel << std::endl;
+
           //prepare for lane change
           if (prepare_for_lane_change){
             int num_vehicles_left = 0;
@@ -144,14 +150,14 @@ int main() {
                 ++num_vehicles_left;
                 vehicle.s += (double)prev_path_size * 0.02 * vehicle.speed;
                 //**if there is a car is too close, set the entire condition to false
-                bool too_close_to_change;
+                bool too_close_to_change = abs(car_s - vehicle.s) < safety_margin;
                 if (too_close_to_change){is_left_lane_free = false;}
               }
               //check right lane
               else if (is_in_same_lane(vehicle.d, intend_lane + 1)){
                 ++num_vehicles_right;
                 vehicle.s += (double)prev_path_size * 0.02 * vehicle.speed;
-                bool too_close_to_change;
+                bool too_close_to_change = abs(car_s - vehicle.s) < safety_margin;
                 if (too_close_to_change){is_right_lane_free = false;}
               }
             }//finishing check left and right lanes
@@ -165,10 +171,7 @@ int main() {
           if (ready_for_lane_change && is_left_lane_free){intend_lane -= 1;}
           else if (ready_for_lane_change && is_right_lane_free){intend_lane += 1;}
 
-          //if unable to change lane, slowly down without collision with front car
-          if (front_car_too_close){ref_vel -= 0.224;}
-          //if there isn't a front car and not above max speed
-          else if (ref_vel < max_speed){ref_vel += 0.224;}
+      
 
 
 
@@ -189,10 +192,10 @@ int main() {
           //if prev_path_size is too small, prev_car_x will not be useful
           if (prev_path_size < 2){
             //use formula to infer previous point
-            double prev_car_x = ref_x - cos(ref_yaw);
-            double prev_car_y = ref_y - sin(ref_yaw);
-            pts_x.push_back(prev_car_x); pts_x.push_back(ref_x);
-            pts_y.push_back(prev_car_y); pts_y.push_back(ref_y);
+            double prev_car_x = car_x - cos(car_yaw);
+            double prev_car_y = car_y - sin(car_yaw);
+            pts_x.push_back(prev_car_x); pts_x.push_back(car_x);
+            pts_y.push_back(prev_car_y); pts_y.push_back(car_y);
           }
           //if there is previous point exists
               //use prev data [-1, -2] as history data
@@ -245,29 +248,25 @@ int main() {
           double target_x     = 30.0; //in meters
           double target_y     = s(target_x);
           double target_dist  = sqrt(target_x*target_x + target_y*target_y);
-          double x_add_on     = 0.0;
-          //convert mph into meters
+          // Find number of split points to get desired speed
+          // 0.02s for each point
+          // 2.24 to convert mph into meters
           double N            = target_dist / (0.02 * ref_vel / 2.24);
 
+          double x_point_car_coord = 0.0;
+          double y_point_car_coord;
           for (size_t i = 0; i < 50 - prev_path_size; ++i){
 
-            double x_point = x_add_on + target_x / N;
-            double y_point = s(x_point);
+            x_point_car_coord += target_x / N;
+            y_point_car_coord = s(x_point_car_coord);
 
-            x_add_on = x_point;
-
-            ref_x = x_point;
-            ref_y = y_point;
-
-            // Rotate back into previous coordinate system
-    				x_point = ref_x * cos(ref_yaw) - ref_y * sin(ref_yaw);
-    				y_point = ref_x * sin(ref_yaw) + ref_y * cos(ref_yaw);
-
-    				x_point += ref_x;
-    				y_point += ref_y;
-
-    				next_x_vals.push_back(x_point);
-    				next_y_vals.push_back(y_point);
+            // Retransformation
+            double x_point_global_coord;
+            double y_point_global_coord;
+            x_point_global_coord = (x_point_car_coord * cos(ref_yaw) - 
+                                        y_point_car_coord * sin(ref_yaw)) + ref_x;
+            y_point_global_coord = (y_point_car_coord * sin(ref_yaw) + 
+                                        y_point_car_coord * cos(ref_yaw)) + ref_y;
           }
 
 
