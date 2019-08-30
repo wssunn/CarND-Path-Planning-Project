@@ -121,11 +121,18 @@ int main() {
 
             //if there is a car in front of us
             if (is_in_same_lane(vehicle.d, intend_lane)){
+              std::cout << "car in same lane! ID: " << vehicle.id << std::endl;
+              std::cout << "vehicle.d: " << vehicle.d << " " << "my_car.d: " << car_d << std::endl;
+
               vehicle.s += (double)prev_path_size * 0.02 * vehicle.speed;
               bool is_in_front_of_us = vehicle.s > car_s;
-              bool is_closer_than_safety_margin = vehicle.s - car_s < safety_margin;
+              bool is_closer_than_safety_margin = (vehicle.s - car_s) < safety_margin;
 
               if (is_in_front_of_us && is_closer_than_safety_margin){
+                std::cout << "front car too close!";
+                std::cout << "vehicle.s: " << vehicle.s;
+                std::cout << "my_car.s: " << car_s << std::endl;
+
                 front_car_too_close = true;
                 prepare_for_lane_change = true;
               }
@@ -138,7 +145,7 @@ int main() {
           else if (ref_vel < max_speed){ref_vel += 0.224;}
 
           //prepare for lane change
-          if (prepare_for_lane_change){
+          if (front_car_too_close && prepare_for_lane_change){
             int num_vehicles_left = 0;
             int num_vehicles_right = 0;
             //check if left and right lanes are free
@@ -169,9 +176,6 @@ int main() {
           //change lanes
           if (ready_for_lane_change && is_left_lane_free){intend_lane -= 1;}
           else if (ready_for_lane_change && is_right_lane_free){intend_lane += 1;}
-
-      
-
 
 
           // List of widely spaced (x, y) waypoints. These will be later interpolated

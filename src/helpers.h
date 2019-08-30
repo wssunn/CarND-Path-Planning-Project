@@ -21,6 +21,7 @@ struct Vehicle {
   double s;
   Vehicle(nlohmann::json sensor_fusion){
     // sensor_fusion [id, x, y, vx, vy, s, d]
+    this->id    = sensor_fusion[0];
     this->vx    = sensor_fusion[3];
     this->vy    = sensor_fusion[4];
     this->s     = sensor_fusion[5];
