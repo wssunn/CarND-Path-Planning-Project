@@ -236,7 +236,7 @@ int main() {
           vector<double> next_y_vals;
 
           // Start with all previous points from last time
-    			for (size_t i = 0; i < previous_path_x.size(); ++i) {
+    			for (size_t i = 0; i < prev_path_size; ++i) {
     				next_x_vals.push_back(previous_path_x[i]);
     				next_y_vals.push_back(previous_path_y[i]);
     			}
@@ -249,7 +249,7 @@ int main() {
           //convert mph into meters
           double N            = target_dist / (0.02 * ref_vel / 2.24);
 
-          for (size_t i = 0; i < 50 - previous_path_x.size(); ++i){
+          for (size_t i = 0; i < 50 - prev_path_size; ++i){
 
             double x_point = x_add_on + target_x / N;
             double y_point = s(x_point);
