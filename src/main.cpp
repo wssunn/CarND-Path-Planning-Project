@@ -62,10 +62,12 @@ int main() {
   int intend_lane = 1;
   // Reference velocity (mph)
   double ref_vel = 0.0;
+  //used if the car is needed to decelerate a lot
+  int deceleration_counter = 0;
 
   h.onMessage([&map_waypoints_x,&map_waypoints_y,&map_waypoints_s,
                &map_waypoints_dx,&map_waypoints_dy,
-               &intend_lane, &ref_vel]
+               &intend_lane, &ref_vel, &deceleration_counter]
               (uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
                uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
@@ -109,9 +111,11 @@ int main() {
           if (prev_path_size > 0){car_s = end_path_s;}
 
           bool front_car_too_close = false;         //becomes true is front car is too close
+          bool front_car_too_slow = false;
           bool front_danger = false;
           bool emergency_braking = false;
           bool prepare_for_lane_change = false;
+
           bool ready_for_lane_change = false;
           //if there is a left or right lane for change
           bool there_is_a_left_lane = intend_lane >= 1; //lane 1,2 has a left lane
@@ -124,7 +128,7 @@ int main() {
 
           bool is_far_left_free = true;           //car may need to jump two lanes
           bool is_far_right_free = true;          //car may need to jump two lanes
-
+          
           // keep lane, access front traffic********************************************
           for (size_t i = 0; i < sensor_fusion.size(); ++i){
             // access the data and store it in an object
@@ -140,9 +144,10 @@ int main() {
               if (is_in_front_of_us && is_closer_than_safety_margin){
                 front_car_too_close = true;
                 prepare_for_lane_change = true;
+                front_car_too_slow = vehicle.speed < car_speed;
 
                 //collision avoidance
-                if (vehicle.speed < car_speed){
+                if (front_car_too_slow){
                   front_danger = (vehicle.s - car_s) < (safety_margin / 3.0);
                   emergency_braking = (vehicle.s - car_s) < (safety_margin / 5.0);
                 }//collision detection system
@@ -151,14 +156,15 @@ int main() {
             }
           }//end for keeping lane*******************************************************
 
-          //if a car in front, slowly down without collision with front car
-          if (front_car_too_close){ref_vel -= 0.224;}
+          if (deceleration_counter > 0){ref_vel -= 0.224; deceleration_counter -= 1;}
+          //if a car in front, slowly down to avoid collision with front car
+          else if (front_car_too_close){ref_vel -= 0.112;}
           //if there isn't a front car and not above max speed
-          else if (ref_vel < max_speed){ref_vel += 0.224;}
+          else if (ref_vel < max_speed && (!front_car_too_slow)){ref_vel += 0.224;}
           
           //emergency braking system
-          if (front_danger){ref_vel -= 0.224;}
-          if (emergency_braking){ref_vel -= 0.224;}
+          if (front_danger){ref_vel -= 0.112;}
+          if (emergency_braking){ref_vel -= 0.112;}
 
           //prepare for lane change********************************************************
           //variables used to compute cost in order to select which is a better lane
@@ -226,7 +232,7 @@ int main() {
               //for situation stuck on a very right lane (lane 2)
               else if ((!is_left_lane_free) && intend_lane == 2 && is_far_left_free)
               {
-                ref_vel -= 0.224;
+                deceleration_counter = 5;
               }
             }
             //on lane 0 or 1, wish to change to right
@@ -236,7 +242,7 @@ int main() {
               //for situation stuck on a very left lane (lane 0)
               else if ((!is_right_lane_free) && intend_lane == 0 && is_far_right_free)
               {
-                ref_vel -= 0.224;
+                deceleration_counter = 5;
               }
             }
           }//end for prepare for lane change***********************************************
