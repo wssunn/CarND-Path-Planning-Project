@@ -158,7 +158,7 @@ int main() {
           
           //emergency braking system
           if (front_danger){ref_vel -= 0.224;}
-          if (emergency_braking){ref_vel -= 1.0;}
+          if (emergency_braking){ref_vel -= 0.224;}
 
           //prepare for lane change********************************************************
           //variables used to compute cost in order to select which is a better lane
@@ -176,7 +176,7 @@ int main() {
               if (there_is_a_left_lane && is_in_same_lane(vehicle.d, intend_lane-1)){
                 vehicle.s += (double)prev_path_size * 0.02 * vehicle.speed;
                 //if there is a car is too close, set the entire condition to false
-                bool too_close_to_change = abs(car_s - vehicle.s) < (safety_margin/2.5);
+                bool too_close_to_change = abs(car_s - vehicle.s) < (safety_margin/1.5);
                 if (too_close_to_change){is_left_lane_free = false;}
 
                 //calculate cost function if left lane is free
@@ -192,7 +192,7 @@ int main() {
               //check immediate right lane, calculate cost as well
               else if (there_is_a_right_lane && is_in_same_lane(vehicle.d, intend_lane+1)){
                 vehicle.s += (double)prev_path_size * 0.02 * vehicle.speed;
-                bool too_close_to_change = abs(car_s - vehicle.s) < (safety_margin/2.5);
+                bool too_close_to_change = abs(car_s - vehicle.s) < (safety_margin/1.5);
                 if (too_close_to_change){is_right_lane_free = false;}
 
                 //calculate cost function if left lane is free
@@ -207,14 +207,14 @@ int main() {
               //on very right lane, check far left lane, only when immediate left lane is not free
               if (intend_lane == 2 && is_in_same_lane(vehicle.d, 0.0)){
                 vehicle.s += (double)prev_path_size * 0.02 * vehicle.speed;
-                bool too_close_to_change = abs(car_s - vehicle.s) < (safety_margin/2.0);
+                bool too_close_to_change = abs(car_s - vehicle.s) < (safety_margin/1.5);
                 if (too_close_to_change){is_far_left_free = false;}
               }
 
               //on very left lane, check far right lane
               else if (intend_lane == 0 && is_in_same_lane(vehicle.d, 2.0)){
                 vehicle.s += (double)prev_path_size * 0.02 * vehicle.speed;
-                bool too_close_to_change = abs(car_s - vehicle.s) < (safety_margin/2.0);
+                bool too_close_to_change = abs(car_s - vehicle.s) < (safety_margin/1.5);
                 if (too_close_to_change){is_far_right_free = false;}
               }
             }//finishing accessing all lanes-----------------------------------------------

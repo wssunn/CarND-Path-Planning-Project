@@ -11,7 +11,7 @@ using std::string;
 using std::vector;
 
 const double lane_width = 4.0;      //width of a lane
-const double safety_margin = 20.0;  //distance to keep from other cars
+const double safety_margin = 30.0;  //distance to keep from other cars
 const double max_speed = 49.5;      //max car speed
 
 struct Vehicle {
