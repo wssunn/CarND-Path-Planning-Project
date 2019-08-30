@@ -142,7 +142,7 @@ int main() {
               //check left lane
               if (is_in_same_lane(vehicle.d, intend_lane - 1)){
                 ++num_vehicles_left;
-                vehicle.s += (double)prev_size * 0.02 * vehicle.speed;
+                vehicle.s += (double)prev_path_size * 0.02 * vehicle.speed;
                 //**if there is a car is too close, set the entire condition to false
                 bool too_close_to_change;
                 if (too_close_to_change){is_left_lane_free = false;}
@@ -150,7 +150,7 @@ int main() {
               //check right lane
               else if (is_in_same_lane(vehicle.d, intend_lane + 1)){
                 ++num_vehicles_right;
-                vehicle.s += (double)prev_size * 0.02 * vehicle.speed;
+                vehicle.s += (double)prev_path_size * 0.02 * vehicle.speed;
                 bool too_close_to_change;
                 if (too_close_to_change){is_right_lane_free = false;}
               }
@@ -197,10 +197,10 @@ int main() {
           //if there is previous point exists
               //use prev data [-1, -2] as history data
           else{
-            ref_x = previous_path_x[prev_size - 1];
-            ref_y = previous_path_y[prev_size - 1];
-            double ref_x_prev = previous_path_x[prev_size - 2];
-            double ref_y_prev = previous_path_y[prev_size - 2];
+            ref_x = previous_path_x[prev_path_size - 1];
+            ref_y = previous_path_y[prev_path_size - 1];
+            double ref_x_prev = previous_path_x[prev_path_size - 2];
+            double ref_y_prev = previous_path_y[prev_path_size - 2];
             double ref_yaw = atan2(ref_y - ref_y_prev, ref_x - ref_x_prev);
 
             pts_x.push_back(ref_x_prev); pts_x.push_back(ref_x);
@@ -232,8 +232,8 @@ int main() {
           s.set_points(pts_x, pts_y);
 
           // Define the actual (x, y) points will be used for the planner
-          vecotr<double> next_x_vals;
-          vecotr<double> next_y_vals;
+          vector<double> next_x_vals;
+          vector<double> next_y_vals;
 
           // Start with all previous points from last time
     			for (size_t i = 0; i < previous_path_x.size(); ++i) {
@@ -256,12 +256,12 @@ int main() {
 
             x_add_on = x_point;
 
-            x_ref = x_point;
-            y_ref = y_point;
+            ref_x = x_point;
+            ref_y = y_point;
 
             // Rotate back into previous coordinate system
-    				x_point = x_ref * cos(ref_yaw) - y_ref * sin(ref_yaw);
-    				y_point = x_ref * sin(ref_yaw) + y_ref * cos(ref_yaw);
+    				x_point = ref_x * cos(ref_yaw) - ref_y * sin(ref_yaw);
+    				y_point = ref_x * sin(ref_yaw) + ref_y * cos(ref_yaw);
 
     				x_point += ref_x;
     				y_point += ref_y;

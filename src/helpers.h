@@ -4,6 +4,7 @@
 #include <math.h>
 #include <string>
 #include <vector>
+#include "json.hpp"
 
 // for convenience
 using std::string;
