@@ -128,7 +128,7 @@ int main() {
 
           bool is_far_left_free = true;           //car may need to jump two lanes
           bool is_far_right_free = true;          //car may need to jump two lanes
-          
+
           // keep lane, access front traffic********************************************
           for (size_t i = 0; i < sensor_fusion.size(); ++i){
             // access the data and store it in an object
@@ -247,8 +247,8 @@ int main() {
             }
           }//end for prepare for lane change***********************************************
 
-
           if (ready_for_lane_change){
+
             if (is_left_lane_free && is_right_lane_free){
               float left_lane_total_cost = 0.005 * num_vehicles_left + vehicle_left_distance_cost;
               float right_lane_total_cost = 0.005 * num_vehicles_right + vehicle_right_distance_cost;
@@ -339,6 +339,7 @@ int main() {
           // 0.02s for each point
           // 2.24 to convert mph into meters
           double N            = target_dist / (0.02 * ref_vel / 2.24);
+          std::cout << car_speed << endl;
 
           double x_point_car_coord = 0.0;
           double y_point_car_coord;
