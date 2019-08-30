@@ -58,7 +58,7 @@ int main() {
     map_waypoints_dy.push_back(d_y);
   }
 
-  // Start on lane 1
+  // Start on lane 1, lane number 0,1,2
   int intend_lane = 1;
   // Reference velocity (mph)
   double ref_vel = 0.0;
@@ -146,13 +146,17 @@ int main() {
 
           //prepare for lane change
           if (front_car_too_close && prepare_for_lane_change){
+            //if there is a left or right lane for change
+            bool there_is_a_left_lane = intend_lane >= 0;
+            bool there_is_a_right_lane = intend_lane <= 2;
+
             int num_vehicles_left = 0;
             int num_vehicles_right = 0;
             //check if left and right lanes are free
             for (size_t i = 0; i < sensor_fusion.size(); ++i){
               Vehicle vehicle(sensor_fusion[i]);
               //check left lane
-              if (is_in_same_lane(vehicle.d, intend_lane - 1)){
+              if (there_is_a_left_lane && is_in_same_lane(vehicle.d, intend_lane-1)){
                 ++num_vehicles_left;
                 vehicle.s += (double)prev_path_size * 0.02 * vehicle.speed;
                 //**if there is a car is too close, set the entire condition to false
@@ -160,15 +164,18 @@ int main() {
                 if (too_close_to_change){is_left_lane_free = false;}
               }
               //check right lane
-              else if (is_in_same_lane(vehicle.d, intend_lane + 1)){
+              else if (there_is_a_right_lane && is_in_same_lane(vehicle.d, intend_lane+1)){
                 ++num_vehicles_right;
                 vehicle.s += (double)prev_path_size * 0.02 * vehicle.speed;
                 bool too_close_to_change = abs(car_s - vehicle.s) < safety_margin;
                 if (too_close_to_change){is_right_lane_free = false;}
               }
             }//finishing check left and right lanes
-            //if either left or right lane is free, set to true
-            if (is_left_lane_free || is_right_lane_free){ready_for_lane_change = true;}
+
+            //if there is a lane
+            //if either left or right lane is free, set to possible for lane change
+            if (there_is_a_left_lane && is_left_lane_free){ready_for_lane_change = true;}
+            if (there_is_a_right_lane && is_right_lane_free){ready_for_lane_change = true;}
             std::cout << "left: " << num_vehicles_left
                       << "  right " << num_vehicles_right << std::endl;
           }//end for prepare for lane change
