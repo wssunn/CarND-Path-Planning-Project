@@ -15,10 +15,11 @@ const double safety_margin = 20.0;  //distance to keep from other cars
 const double max_speed = 49.5;      //max car speed
 
 struct Vehicle {
-  double d;
+  double id;
   double vx, vy;
-  double speed;
   double s;
+  double d;
+  double speed;
   Vehicle(nlohmann::json sensor_fusion){
     // sensor_fusion [id, x, y, vx, vy, s, d]
     this->id    = sensor_fusion[0];
