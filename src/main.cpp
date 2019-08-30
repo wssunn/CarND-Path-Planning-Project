@@ -121,8 +121,8 @@ int main() {
 
             //if there is a car in front of us
             if (is_in_same_lane(vehicle.d, intend_lane)){
-              std::cout << "car in same lane! ID: " << vehicle.id << std::endl;
-              std::cout << "vehicle.d: " << vehicle.d << " " << "my_car.d: " << car_d << std::endl;
+              // std::cout << "car in same lane! ID: " << vehicle.id << std::endl;
+              // std::cout << "vehicle.d: " << vehicle.d << " " << "my_car.d: " << car_d << std::endl;
 
               vehicle.s += (double)prev_path_size * 0.02 * vehicle.speed;
               bool is_in_front_of_us = vehicle.s > car_s;
