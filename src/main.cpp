@@ -270,16 +270,9 @@ int main() {
             next_x_vals.push_back(x_point_global_coord);
             next_y_vals.push_back(y_point_global_coord);
           }
-
-
-          
+ 
           msgJson["next_x"] = next_x_vals;
           msgJson["next_y"] = next_y_vals;
-
-          for (auto &vec : next_x_vals){
-            std::cout << vec;
-          }
-          std::cout << std::endl;
 
           auto msg = "42[\"control\","+ msgJson.dump()+"]";
 
