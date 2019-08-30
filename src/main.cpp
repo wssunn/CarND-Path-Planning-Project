@@ -109,19 +109,23 @@ int main() {
           if (prev_path_size > 0){car_s = end_path_s;}
 
           bool front_car_too_close = false;         //becomes true is front car is too close
+          bool front_danger = false;
+          bool emergency_braking = false;
           bool prepare_for_lane_change = false;
           bool ready_for_lane_change = false;
           //if there is a left or right lane for change
           bool there_is_a_left_lane = intend_lane >= 1; //lane 1,2 has a left lane
           bool there_is_a_right_lane = intend_lane <= 1;//lane 0,1 has a right lane
-          bool there_is_a_changeable_lane = there_is_a_left_lane || there_is_a_right_lane;
 
           bool is_left_lane_free = true;            //set to true, if there is a false, change to false
           bool is_right_lane_free = true;
           if (!there_is_a_left_lane){is_left_lane_free = false;}
           if (!there_is_a_right_lane){is_right_lane_free = false;}
 
-          // iterate through all detected cars from sensor fusion
+          bool is_far_left_free = true;           //car may need to jump two lanes
+          bool is_far_right_free = true;          //car may need to jump two lanes
+
+          // keep lane, access front traffic********************************************
           for (size_t i = 0; i < sensor_fusion.size(); ++i){
             // access the data and store it in an object
             Vehicle vehicle(sensor_fusion[i]);
@@ -136,50 +140,117 @@ int main() {
               if (is_in_front_of_us && is_closer_than_safety_margin){
                 front_car_too_close = true;
                 prepare_for_lane_change = true;
+
+                //collision avoidance
+                if (vehicle.speed < car_speed){
+                  front_danger = (vehicle.s - car_s) < (safety_margin / 2.0);
+                  emergency_braking = (vehicle.s - car_s) < (safety_margin / 4.0);
+                }//collision detection system
+
               }
             }
-          }//end for iteration over all sensor Fusion
+          }//end for keeping lane*******************************************************
 
           //if a car in front, slowly down without collision with front car
           if (front_car_too_close){ref_vel -= 0.224;}
           //if there isn't a front car and not above max speed
           else if (ref_vel < max_speed){ref_vel += 0.224;}
+          
+          //emergency braking system
+          if (front_danger){ref_vel -= 0.224;}
+          if (emergency_braking){ref_vel -= 1.0;}
 
-          //prepare for lane change
-          if (there_is_a_changeable_lane && prepare_for_lane_change){
-            int num_vehicles_left = 0;
-            int num_vehicles_right = 0;
-            //check if left and right lanes are free
+          //prepare for lane change********************************************************
+          //variables used to compute cost in order to select which is a better lane
+          int num_vehicles_left = 0;
+          int num_vehicles_right = 0;
+          float vehicle_left_distance_cost = 0.0;
+          float vehicle_right_distance_cost = 0.0;
+
+          if (prepare_for_lane_change){
+            //access all lanes-----------------------------------------------------------
             for (size_t i = 0; i < sensor_fusion.size(); ++i){
               Vehicle vehicle(sensor_fusion[i]);
-              //check left lane
-              if (is_in_same_lane(vehicle.d, intend_lane-1)){
-                ++num_vehicles_left;
+
+              //check immediate left lane, calculate cost as well
+              if (there_is_a_left_lane && is_in_same_lane(vehicle.d, intend_lane-1)){
                 vehicle.s += (double)prev_path_size * 0.02 * vehicle.speed;
-                //**if there is a car is too close, set the entire condition to false
-                bool too_close_to_change = abs(car_s - vehicle.s) < safety_margin;
+                //if there is a car is too close, set the entire condition to false
+                bool too_close_to_change = abs(car_s - vehicle.s) < (safety_margin/2.0);
                 if (too_close_to_change){is_left_lane_free = false;}
+
+                //calculate cost function if left lane is free
+                //only for vehicles in front of our car
+                if (is_left_lane_free && vehicle.s > car_s)
+                {
+                  ++num_vehicles_left;
+                  //more cars on the left lane with closer distance, bigger the cost
+                  vehicle_left_distance_cost += 1/(vehicle.s - car_s);
+                }
               }
-              //check right lane
-              else if (is_in_same_lane(vehicle.d, intend_lane+1)){
-                ++num_vehicles_right;
+
+              //check immediate right lane, calculate cost as well
+              else if (there_is_a_right_lane && is_in_same_lane(vehicle.d, intend_lane+1)){
                 vehicle.s += (double)prev_path_size * 0.02 * vehicle.speed;
-                bool too_close_to_change = abs(car_s - vehicle.s) < safety_margin;
+                bool too_close_to_change = abs(car_s - vehicle.s) < (safety_margin/2.0);
                 if (too_close_to_change){is_right_lane_free = false;}
+
+                //calculate cost function if left lane is free
+                //only for vehicles in front of our car
+                if (is_left_lane_free && vehicle.s > car_s)
+                {
+                  ++num_vehicles_right;
+                  vehicle_right_distance_cost += 1 / (vehicle.s - car_s);
+                }
               }
-            }//finishing check left and right lanes
 
-            //if there is a lane
-            //if either left or right lane is free, set to possible for lane change
-            if (there_is_a_left_lane && is_left_lane_free){ready_for_lane_change = true;}
-            if (there_is_a_right_lane && is_right_lane_free){ready_for_lane_change = true;}
-            std::cout << "left: " << num_vehicles_left
-                      << "  right " << num_vehicles_right << std::endl;
-          }//end for prepare for lane change
+              //on very right lane, check far left lane, only when immediate left lane is not free
+              if (intend_lane == 2 && is_in_same_lane(vehicle.d, 0.0)){
+                vehicle.s += (double)prev_path_size * 0.02 * vehicle.speed;
+                bool too_close_to_change = abs(car_s - vehicle.s) < (safety_margin/2.0);
+                if (too_close_to_change){is_far_left_free = false;}
+              }
 
-          //change lanes
-          if (ready_for_lane_change && is_left_lane_free){intend_lane -= 1;}
-          else if (ready_for_lane_change && is_right_lane_free){intend_lane += 1;}
+              //on very left lane, check far right lane
+              else if (intend_lane == 0 && is_in_same_lane(vehicle.d, 2.0)){
+                vehicle.s += (double)prev_path_size * 0.02 * vehicle.speed;
+                bool too_close_to_change = abs(car_s - vehicle.s) < (safety_margin/2.0);
+                if (too_close_to_change){is_far_right_free = false;}
+              }
+            }//finishing accessing all lanes-----------------------------------------------
+
+            //on lane 1 or 2, wish to change to left
+            if (there_is_a_left_lane){
+              //if there is a lane and left lane is free, set to possible for lane change
+              if (is_left_lane_free){ready_for_lane_change = true;}
+              //for situation stuck on a very right lane (lane 2)
+              else if (intend_lane == 2 && is_far_left_free){
+                ref_vel -= 0.224;
+              }
+            }
+            //on lane 0 or 1, wish to change to right
+            else if (there_is_a_right_lane){
+              //if right lane is free, set to possible for lane change
+              if (is_right_lane_free){ready_for_lane_change = true;}
+              //for situation stuck on a very left lane (lane 0)
+              else if (intend_lane == 0 && is_far_right_free){
+                ref_vel -= 0.224;
+              }
+            }
+          }//end for prepare for lane change***********************************************
+
+
+          if (ready_for_lane_change){
+            if (is_left_lane_free && is_right_lane_free){
+              float left_lane_total_cost = 0.1 * num_vehicles_left + vehicle_left_distance_cost;
+              float right_lane_total_cost = 0.1 * num_vehicles_right + vehicle_right_distance_cost;
+              std::cout << num_vehicles_left << " " << vehicle_left_distance_cost << std::endl;
+              if (left_lane_total_cost < right_lane_total_cost){intend_lane -= 1;}
+              else if (left_lane_total_cost > right_lane_total_cost){intend_lane += 1;}
+            }
+            else if (is_left_lane_free){intend_lane -= 1;}
+            else if (is_right_lane_free){intend_lane += 1;}
+          }
 
 
           // List of widely spaced (x, y) waypoints. These will be later interpolated
