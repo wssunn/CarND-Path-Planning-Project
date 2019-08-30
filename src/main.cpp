@@ -136,7 +136,6 @@ int main() {
           if (front_car_too_close){ref_vel -= 0.224;}
           //if there isn't a front car and not above max speed
           else if (ref_vel < max_speed){ref_vel += 0.224;}
-          std::cout << ref_vel << std::endl;
 
           //prepare for lane change
           if (prepare_for_lane_change){
@@ -267,12 +266,20 @@ int main() {
                                         y_point_car_coord * sin(ref_yaw)) + ref_x;
             y_point_global_coord = (y_point_car_coord * sin(ref_yaw) + 
                                         y_point_car_coord * cos(ref_yaw)) + ref_y;
+
+            next_x_vals.push_back(x_point_global_coord);
+            next_y_vals.push_back(y_point_global_coord);
           }
 
 
-
+          
           msgJson["next_x"] = next_x_vals;
           msgJson["next_y"] = next_y_vals;
+
+          for (auto &vec : next_x_vals){
+            std::cout << vec;
+          }
+          std::endl;
 
           auto msg = "42[\"control\","+ msgJson.dump()+"]";
 
