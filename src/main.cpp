@@ -246,8 +246,8 @@ int main() {
             if (is_left_lane_free && is_right_lane_free){
               float left_lane_total_cost = 0.005 * num_vehicles_left + vehicle_left_distance_cost;
               float right_lane_total_cost = 0.005 * num_vehicles_right + vehicle_right_distance_cost;
-              std::cout << num_vehicles_left << "   " << vehicle_left_distance_cost << std::endl;
-              std::cout << num_vehicles_right << "   " << vehicle_right_distance_cost << std::endl;
+              // std::cout << num_vehicles_left << "   " << vehicle_left_distance_cost << std::endl;
+              // std::cout << num_vehicles_right << "   " << vehicle_right_distance_cost << std::endl;
               if (left_lane_total_cost < right_lane_total_cost){intend_lane -= 1;}
               else if (left_lane_total_cost > right_lane_total_cost){intend_lane += 1;}
             }
