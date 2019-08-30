@@ -19,7 +19,7 @@ struct Vehicle {
   double vx, vy;
   double speed;
   double s;
-  Vehicle(nlohmansn::json sensor_fusion){
+  Vehicle(nlohmann::json sensor_fusion){
     // sensor_fusion [id, x, y, vx, vy, s, d]
     this->vx    = sensor_fusion[3];
     this->vy    = sensor_fusion[4];
