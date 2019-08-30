@@ -333,9 +333,9 @@ int main() {
 
           // Calculate how to break up spline points to travel at ref velocity
           double target_x = 30.0;
-          if (car_speed < 20.0){target_x = 60.0;}
-          else if (car_speed < 30.0){target_x = 50.0;}
-          else if (car_speed < 40.0){target_x = 40.0;}
+          if (car_speed < 20.0){target_x = 90.0;}
+          else if (car_speed < 30.0){target_x = 90.0;}
+          else if (car_speed < 40.0){target_x = 90.0;}
           double target_y     = s(target_x);
           double target_dist  = sqrt(target_x*target_x + target_y*target_y);
           // Find number of split points to get desired speed
