@@ -322,7 +322,7 @@ int main() {
           s.set_points(pts_x, pts_y);
 
           // Define the actual (x, y) points will be used for the planner
-          vector<double> next_x_vals;`
+          vector<double> next_x_vals;
           vector<double> next_y_vals;
 
           // Start with all previous points from last time
