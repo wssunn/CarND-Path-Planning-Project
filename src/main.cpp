@@ -129,9 +129,9 @@ int main() {
               bool is_closer_than_safety_margin = (vehicle.s - car_s) < safety_margin;
 
               if (is_in_front_of_us && is_closer_than_safety_margin){
-                std::cout << "front car too close!";
-                std::cout << "vehicle.s: " << vehicle.s;
-                std::cout << "my_car.s: " << car_s << std::endl;
+                // std::cout << "front car too close!";
+                // std::cout << "vehicle.s: " << vehicle.s;
+                // std::cout << "my_car.s: " << car_s << std::endl;
 
                 front_car_too_close = true;
                 prepare_for_lane_change = true;
@@ -258,6 +258,7 @@ int main() {
 
           double x_point_car_coord = 0.0;
           double y_point_car_coord;
+
           for (size_t i = 0; i < 50 - prev_path_size; ++i){
 
             x_point_car_coord += target_x / N;
@@ -268,7 +269,7 @@ int main() {
             double y_point_global_coord;
             x_point_global_coord = (x_point_car_coord * cos(ref_yaw) - 
                                         y_point_car_coord * sin(ref_yaw)) + ref_x;
-            y_point_global_coord = (y_point_car_coord * sin(ref_yaw) + 
+            y_point_global_coord = (x_point_car_coord * sin(ref_yaw) + 
                                         y_point_car_coord * cos(ref_yaw)) + ref_y;
 
             next_x_vals.push_back(x_point_global_coord);
