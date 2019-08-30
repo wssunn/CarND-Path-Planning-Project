@@ -279,7 +279,7 @@ int main() {
           for (auto &vec : next_x_vals){
             std::cout << vec;
           }
-          std::endl;
+          std::cout << std::endl;
 
           auto msg = "42[\"control\","+ msgJson.dump()+"]";
 
