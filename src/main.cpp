@@ -143,8 +143,8 @@ int main() {
 
                 //collision avoidance
                 if (vehicle.speed < car_speed){
-                  front_danger = (vehicle.s - car_s) < (safety_margin / 2.0);
-                  emergency_braking = (vehicle.s - car_s) < (safety_margin / 4.0);
+                  front_danger = (vehicle.s - car_s) < (safety_margin / 3.0);
+                  emergency_braking = (vehicle.s - car_s) < (safety_margin / 5.0);
                 }//collision detection system
 
               }
@@ -176,7 +176,7 @@ int main() {
               if (there_is_a_left_lane && is_in_same_lane(vehicle.d, intend_lane-1)){
                 vehicle.s += (double)prev_path_size * 0.02 * vehicle.speed;
                 //if there is a car is too close, set the entire condition to false
-                bool too_close_to_change = abs(car_s - vehicle.s) < (safety_margin/2.0);
+                bool too_close_to_change = abs(car_s - vehicle.s) < (safety_margin/2.5);
                 if (too_close_to_change){is_left_lane_free = false;}
 
                 //calculate cost function if left lane is free
@@ -192,7 +192,7 @@ int main() {
               //check immediate right lane, calculate cost as well
               else if (there_is_a_right_lane && is_in_same_lane(vehicle.d, intend_lane+1)){
                 vehicle.s += (double)prev_path_size * 0.02 * vehicle.speed;
-                bool too_close_to_change = abs(car_s - vehicle.s) < (safety_margin/2.0);
+                bool too_close_to_change = abs(car_s - vehicle.s) < (safety_margin/2.5);
                 if (too_close_to_change){is_right_lane_free = false;}
 
                 //calculate cost function if left lane is free
@@ -224,7 +224,8 @@ int main() {
               //if there is a lane and left lane is free, set to possible for lane change
               if (is_left_lane_free){ready_for_lane_change = true;}
               //for situation stuck on a very right lane (lane 2)
-              else if (intend_lane == 2 && is_far_left_free){
+              else if ((!is_left_lane_free) && intend_lane == 2 && is_far_left_free)
+              {
                 ref_vel -= 0.224;
               }
             }
@@ -233,7 +234,8 @@ int main() {
               //if right lane is free, set to possible for lane change
               if (is_right_lane_free){ready_for_lane_change = true;}
               //for situation stuck on a very left lane (lane 0)
-              else if (intend_lane == 0 && is_far_right_free){
+              else if ((!is_right_lane_free) && intend_lane == 0 && is_far_right_free)
+              {
                 ref_vel -= 0.224;
               }
             }
@@ -242,9 +244,10 @@ int main() {
 
           if (ready_for_lane_change){
             if (is_left_lane_free && is_right_lane_free){
-              float left_lane_total_cost = 0.1 * num_vehicles_left + vehicle_left_distance_cost;
-              float right_lane_total_cost = 0.1 * num_vehicles_right + vehicle_right_distance_cost;
-              std::cout << num_vehicles_left << " " << vehicle_left_distance_cost << std::endl;
+              float left_lane_total_cost = 0.005 * num_vehicles_left + vehicle_left_distance_cost;
+              float right_lane_total_cost = 0.005 * num_vehicles_right + vehicle_right_distance_cost;
+              std::cout << num_vehicles_left << "   " << vehicle_left_distance_cost << std::endl;
+              std::cout << num_vehicles_right << "   " << vehicle_right_distance_cost << std::endl;
               if (left_lane_total_cost < right_lane_total_cost){intend_lane -= 1;}
               else if (left_lane_total_cost > right_lane_total_cost){intend_lane += 1;}
             }
