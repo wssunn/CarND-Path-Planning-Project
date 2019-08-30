@@ -332,14 +332,14 @@ int main() {
     			}
 
           // Calculate how to break up spline points to travel at ref velocity
-          double target_x     = 30.0; //in meters
+          if (car_speed < 20.0){double target_x = 15.0;}
+          else {double target_x = 30.0;}
           double target_y     = s(target_x);
           double target_dist  = sqrt(target_x*target_x + target_y*target_y);
           // Find number of split points to get desired speed
           // 0.02s for each point
           // 2.24 to convert mph into meters
           double N            = target_dist / (0.02 * ref_vel / 2.24);
-          std::cout << car_speed << std::endl;
 
           double x_point_car_coord = 0.0;
           double y_point_car_coord;
