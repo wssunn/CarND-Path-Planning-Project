@@ -247,6 +247,7 @@ int main() {
             }
           }//end for prepare for lane change***********************************************
 
+          // lane change*******************************************************************
           if (ready_for_lane_change){
 
             if (is_left_lane_free && is_right_lane_free){
@@ -259,9 +260,9 @@ int main() {
             }
             else if (is_left_lane_free){intend_lane -= 1;}
             else if (is_right_lane_free){intend_lane += 1;}
-          }
+          }//end lane change*************************************************************************
 
-
+          //trajectory generation*********************************************************************
           // List of widely spaced (x, y) waypoints. These will be later interpolated
     			// with a spline, filling it with more points which control speed.
     			vector<double> pts_x;
@@ -321,6 +322,7 @@ int main() {
           tk::spline s;
           s.set_points(pts_x, pts_y);
 
+          //create a list of planned points for the car to travel--------------------------------------
           // Define the actual (x, y) points will be used for the planner
           vector<double> next_x_vals;
           vector<double> next_y_vals;
