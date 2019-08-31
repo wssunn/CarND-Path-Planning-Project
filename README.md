@@ -22,18 +22,20 @@ As a result of a short test.
 
 
 ## Pseudocode
-Here is pseudocode of the my project.
+Here is pseudocode of the my project. All code is in /src/main.cpp with some helper functions in /src/helpers.h.
 
 ```cpp
 /*
+in src/main.cpp
 //behaviour planning---------------------------------------------------
 start in lane 1, accelerate to normal speed
-access front traffic
+access front traffic (main.cpp line 132 - 167)
     if there is a car in front and it is too close:
         prepare_for_lane_change
         if the car is too close:
             activate emergency braking
-prepare_for_lane_change
+
+prepare_for_lane_change (main.cpp line 169 - 248)
     find a nearby lane which is relatively free of traffic
         if the lane is free, record the number of cars on that lane
         ready_for_change_lane
@@ -43,14 +45,15 @@ prepare_for_lane_change
             reduce speed to make it safe to change to nearby lane
                 match speed with cars on the nearby lane
             ready_for_change_lane
-ready_for_lane_change:
+
+ready_for_lane_change (main.cpp line 250 - 263)
     if both nearby lanes are free:
         pick the lane with less traffic
     else if left/right is free:
         change to left/right
 
 //trajectory generation------------------------------------------------
-create a list of waypoints (x, y)
+create a list of waypoints (x, y) (line 265 - 323)
     if not previous data:
         use current motion data to infer previous position
         add inferred data and current data as first two waypoints
@@ -62,7 +65,9 @@ create a list of waypoints (x, y)
         5 waypoints is used to fit a polynomial of power of 5
             in order to minimise jerk
 
-create a list of planned points for the car to travel
+create a list of planned points for the car to travel (line 325 - 363)
+    add all previous points computed but not used from last time
+        in order to make a smooth transition
     divide the polynomial into a lot of small points
         to make it practical for the car to travel (each point for one refresh 0.02s)
 
