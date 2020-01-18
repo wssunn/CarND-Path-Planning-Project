@@ -9,9 +9,10 @@ In this project the goal is to safely navigate around a virtual highway with oth
 ## Some highlights
 1. A finite state machine is used in this project for decision process.
 ![alt text][image1]
-2. During preparing for lane change, a cost function is used to take account of traffic density on each possible option. Different weight is given for traffic at different distance to the car (closest is given the biggest weight). Then the option with the smallest cost function (least traffic) is chosen.
-3. Due to a latency between the simulator running and the path planner returning a path, during this delay the simulator will continue using points that it was last given. Hence some past points are stored and used to generate trajectory so as to ensure a smooth transition.
-4. If the car is on the far left or far right lane and the car is stuck (there is a car directly next to it in the middle lane), however the furthest away lane is free, a deceleration counter is set to let the car decelerates for a longer period of time.
+2. During preparing for lane change, a cost function is used to take account of traffic density on each possible option. Different weight is given for traffic at different distance to the car.
+3. Once a decision if made and future waypoint is determined, a smooth trajectory with minimum jerk is generated for control to follow
+4. Due to a delay between the simulator running and the path planner returning a path, the simulator will continue using points that it was last given. Hence some past points are stored and used to generate trajectory to ensure a smooth transition.
+5. If the car is on the far left or far right lane and the car is stuck (there is a car directly next to it in the middle lane), however the furthest away lane is free, a deceleration counter is set to let the car decelerates for a longer period.
 
 ## Result
 As a result of a short test.
